@@ -49,13 +49,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="Files\BBC_train_full.csv" />
+    <None Include="Files\BBC_train_full.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ML Algorithms\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Files\prefix-suffix.txt" />
+    <Content Include="Files\suffix.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Files\prefix.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
