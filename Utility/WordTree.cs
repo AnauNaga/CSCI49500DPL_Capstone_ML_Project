@@ -8,7 +8,7 @@ namespace Main
 {
     public class WordTree
     {
-        protected Tree wordTree = new Tree();
+        public Tree wordTree = new Tree();
         public List<Tree> Vocabulary = new List<Tree>();
 
         public WordTree()
@@ -37,9 +37,10 @@ namespace Main
                 Tree currBranch = wordLeaf;
                 string word = "";
 
-                while (currBranch.rootTree != null )
+                while (currBranch.branches != null )
                 {
-                    word.Append(currBranch.letter);
+                    if (currBranch.letter == '\0') break;
+                    word += currBranch.letter;
                     currBranch = currBranch.rootTree;
 
                 }
@@ -68,13 +69,12 @@ namespace Main
                     if (currTree.branches.ContainsKey(letter))
                     {
                         currTree = currTree.branches[letter];
-                        currTree.letter = letter;
                     }
                     else
                     {
                         currTree.branches.Add(letter, new Tree());
-                        currTree.branches[letter].RootTree = currTree;
-                        currTree.branches[letter].RootTree = currTree;
+                        currTree.branches[letter].rootTree = currTree;
+                        currTree = currTree.branches[letter];
                         currTree.letter = letter;
                     }
                 }
