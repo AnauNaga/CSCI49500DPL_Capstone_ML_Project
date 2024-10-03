@@ -73,8 +73,8 @@ namespace Main
                     else
                     {
                         currTree.branches.Add(letter, new Tree());
-                        currTree.branches[letter].RootTree = currTree;
-                        currTree.branches[letter].RootTree = currTree;
+                        currTree.branches[letter].rootTree = currTree;
+                        currTree.branches[letter].rootTree = currTree;
                         currTree.letter = letter;
                     }
                 }

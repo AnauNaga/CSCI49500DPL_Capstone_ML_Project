@@ -2,6 +2,8 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Main
 {
@@ -13,6 +15,12 @@ namespace Main
         public static List<List<string>> CSVData;
 
         public static void Main(string[] args)
+        {
+            Stemming.stemWord("Ma");
+            Console.ReadKey();
+        }
+
+        public static void stemLement()
         {
             string suffixes = File.ReadAllText(".\\Files\\suffix.txt");
             string data = File.ReadAllText(".\\Files\\BBC_train_full.csv");
@@ -29,12 +37,17 @@ namespace Main
 
             //remove empty elements
             parsedWords[1].RemoveAll(element => element == "");
-
-            //for each word in the first news story
-            for (int i = 0; i < parsedWords[1].Count();i++)
+            for (int news = 1; news < parsedWords[1].Count - 1; news++)
             {
-                Console.Write(parsedWords[1][i]);
-                Console.Write(' ');
+                //for each word in the first news story
+                //for (int i = 0; i < parsedWords[1].Count(); i++)
+                //{
+                //    Console.CursorLeft = 0;
+                //    Console.Write(news);
+                //}
+
+                Console.CursorLeft = 0;
+                Console.Write(news);
             }
             wordTree = new WordTree(parsedWords[1].ToArray());
             suffixTree = new WordTree(suffixList);
@@ -80,20 +93,76 @@ namespace Main
     
     public static class Stemming
     {
-        public static string[] stemArray(string[] words)
+        public static List<string> stemArray(List<string> words)
         {
-            string returnArray[];
+            List<string> returnArray = new List<string>();
+
+            for (int i = 0; i < words.Count; i++) {
+            }
 
             return returnArray;
 
         }
 
+        private static char[] vowels = { 'a', 'e', 'i', 'o', 'u' };
         public static string stemWord(string word)
         {
+            //bit packing
+            //0 is a constant
+            //1 is a vowel
+
             string returnWord;
-            char[] wordArray = word.ToArray();
-            wordArray;
-            return returnWord;
+            ulong wordStructure = 0;
+            char structureLength = (char)word.Count();
+            ulong newWordStructure = 0;
+
+            //convert word to word structure 
+            for(int i = 0; i < word.Length; i++)
+            {
+                wordStructure = wordStructure << 1;
+                if (!vowels.Contains(word[i]))
+                    wordStructure += 1;
+            }
+            //reduce word structure
+            char currLetter = (char)(wordStructure & 1);
+            wordStructure = wordStructure >> 1;
+            int newStructSize = 1;
+            for (int i = 0; i < word.Length-1; i++)
+            {
+                //if there are two consonants or vowels in a row, combine them
+                newWordStructure = newWordStructure | currLetter;
+                if ( currLetter == (char)(wordStructure & 1))
+                {
+                    wordStructure >>= 1;
+                }
+                else
+                {
+                    newStructSize++;
+                    newWordStructure = newWordStructure << 1;
+                    currLetter = (char)(wordStructure & 1);
+                    wordStructure >>= 1;
+                }
+            }
+            newWordStructure = newWordStructure | currLetter;
+
+
+            Console.WriteLine(Convert.ToString((int)newWordStructure, 2));
+            //Count the number of vowel-consonant pairs
+            int vcPairs = 0;
+            if ((newWordStructure & 1) == 0) newWordStructure >>= 1;
+            while (newStructSize > 1)
+            {
+                if ((newWordStructure & 3) == 1)
+                {
+                    vcPairs++;
+                }
+                newWordStructure >>= 2;
+                newStructSize -= 2;
+            }
+
+
+            Console.WriteLine(vcPairs);
+            return "returnWord";
         }
     }
 
