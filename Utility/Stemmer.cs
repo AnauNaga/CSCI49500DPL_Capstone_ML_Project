@@ -15,10 +15,11 @@ namespace Main
 
         public static List<string> stemArray(List<string> words)
         {
-            List<string> returnArray = new List<string>();
+            List<string> returnArray = new List<string>(new string[words.Count()]);
 
             for (int i = 0; i < words.Count; i++)
             {
+                returnArray[i] = stemWord(words[i]);
             }
 
             return returnArray;
@@ -43,7 +44,7 @@ namespace Main
             if (word.EndsWith("sses")) returnWord = replaceEnd(word, "sses", "ss");
             else if (word.EndsWith("ies")) returnWord = replaceEnd(word, "ies", "i");
             else if (word.EndsWith("ss")) returnWord = replaceEnd(word, "ss", "ss");
-            else if (word.EndsWith("s")) returnWord = replaceEnd(word, "s", "");
+            else if (word.EndsWith("s") && word.Length > 2) returnWord = replaceEnd(word, "s", "");
 
             //
             //      Step 1b

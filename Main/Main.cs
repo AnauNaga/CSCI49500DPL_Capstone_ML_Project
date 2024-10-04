@@ -21,10 +21,18 @@ namespace Main
         {
             List<string> vocabulary = new List<string>();
             stemLemment();
-            foreach (List<string> newsStory in lemmentedData)
-                foreach (string word in newsStory)
-                    if (!vocabulary.Contains(word)) vocabulary.Add(word);
-            Console.WriteLine("Finished tokenization");
+            foreach (List<string> newsStory in lemmentedData) {
+                foreach (string word in newsStory) {
+                    if (!vocabulary.Contains(word))
+                    {
+                        vocabulary.Add(word);
+                        Console.Write(vocabulary.Count());
+                        Console.SetCursorPosition(0, Console.CursorTop);
+                    }
+                }
+            }
+            Console.WriteLine();
+            Console.WriteLine("Finished populating vocabulary");
             answers = CSVData[0];
             answers.RemoveAt(0);
             NaiveBayes.learnData(CSVData[0].GetRange(0,200), stemmedData.GetRange(0,200));
@@ -105,13 +113,23 @@ namespace Main
             //Stem the words
             stemmedData = new List<List<string>>(new List<string>[parsedWords.Count()]);
             for (int newsStory = 0; newsStory < parsedWords.Count(); newsStory++)
+            {
                 stemmedData[newsStory] = Stemmer.stemArray(parsedWords[newsStory]);
-
+                Console.Write($"{newsStory + 1} / {parsedWords.Count()}");
+                Console.SetCursorPosition(0, Console.CursorTop);
+            }
+            Console.WriteLine();
+            Console.WriteLine("Finished stemming");
             //lemment the words
              lemmentedData = new List<List<string>>(new List<string>[parsedWords.Count()]);
             for (int newsStory = 0; newsStory < parsedWords.Count(); newsStory++)
+            {
                 lemmentedData[newsStory] = Lemmenter.lemmentArray(parsedWords[newsStory]);
-
+                Console.Write($"{newsStory + 1} / {parsedWords.Count()}");
+                Console.SetCursorPosition(0, Console.CursorTop);
+            }
+            Console.WriteLine();
+            Console.WriteLine("Finished Lemmenting");
 
 
 
