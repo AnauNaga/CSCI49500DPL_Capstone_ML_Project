@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using LemmaSharp;
+using Master;
 
 namespace Main
 {
@@ -12,27 +13,34 @@ namespace Main
     {
 
         public static List<List<string>> CSVData;
-        public static List<List<string>> stemmedWords;
-        public static List<List<string>> lemmentedWords;
+        public static List<List<string>> stemmedData;
+        public static List<List<string>> lemmentedData;
+        public static List<string> answers;
 
         public static void Main(string[] args)
         {
-            //List<string> vocabulary = new List<string>();
-            //stemLemment();
-            //foreach(List<string> newsStory in lemmentedWords)
-            //    foreach (string word in newsStory) 
-            //        if(!vocabulary.Contains(word))vocabulary.Add(word);
-
-            //foreach (string word in vocabulary)
-            //    Console.WriteLine(word);
+            List<string> vocabulary = new List<string>();
+            stemLemment();
+            foreach (List<string> newsStory in lemmentedData)
+                foreach (string word in newsStory)
+                    if (!vocabulary.Contains(word)) vocabulary.Add(word);
+            Console.WriteLine("Finished tokenization");
+            answers = CSVData[0];
+            answers.RemoveAt(0);
+            NaiveBayes.learnData(CSVData[0].GetRange(0,200), stemmedData.GetRange(0,200));
+            Console.WriteLine("Finished learning data");
             string input = "";
-            while (input != "end")
+            while(input != "end")
             {
                 input = Console.ReadLine();
-                Console.WriteLine(Lemmenter.lemmentWord(input));
+                foreach (string word in lemmentedData[Convert.ToInt32(input)])
+                {
+                    Console.Write(word + " ");
+                }
+                Console.WriteLine();
+                Console.ReadKey();
+                Console.WriteLine(NaiveBayes.estimateData(lemmentedData[Convert.ToInt32(input)]));
             }
-
-            Console.ReadKey();
         }
 
         public static void stemLemment()
@@ -84,21 +92,27 @@ namespace Main
             //Parses Data into a 2-dimensional array of strings. the news stories are still one long string that needs to be parsed
             CSVData = parseCSVData(data);
 
-            //Parse the long new stories into individual words
+            //Parse the single string news stories into individual words of multiple strings
             List<List<string>> parsedWords = parseWords(CSVData);
-             stemmedWords = new List<List<string>>(new List<string>[parsedWords.Count()]);
-            for (int newsStory = 0; newsStory < parsedWords.Count(); newsStory++)
-                stemmedWords[newsStory] = Stemmer.stemArray(parsedWords[newsStory]);
-
-             lemmentedWords = new List<List<string>>(new List<string>[parsedWords.Count()]);
-            for (int newsStory = 0; newsStory < parsedWords.Count(); newsStory++)
-                lemmentedWords[newsStory] = Lemmenter.lemmentArray(parsedWords[newsStory]);
-
 
             //remove empty elements
             parsedWords[1].RemoveAll(element => element == "");
             //remove stop words
             parsedWords[1].RemoveAll(element => stopWordList.Contains(element));
+            //remove the csv category data
+            parsedWords.RemoveAt(0);
+
+            //Stem the words
+            stemmedData = new List<List<string>>(new List<string>[parsedWords.Count()]);
+            for (int newsStory = 0; newsStory < parsedWords.Count(); newsStory++)
+                stemmedData[newsStory] = Stemmer.stemArray(parsedWords[newsStory]);
+
+            //lemment the words
+             lemmentedData = new List<List<string>>(new List<string>[parsedWords.Count()]);
+            for (int newsStory = 0; newsStory < parsedWords.Count(); newsStory++)
+                lemmentedData[newsStory] = Lemmenter.lemmentArray(parsedWords[newsStory]);
+
+
 
 
         }

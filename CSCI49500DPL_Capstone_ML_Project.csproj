@@ -67,6 +67,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ML Algorithms\NaiveBayes.cs" />
     <Compile Include="Utility\Lemmenter.cs" />
     <Compile Include="Main\Main.cs" />
     <Compile Include="Utility\Stemmer.cs" />
@@ -86,9 +87,7 @@
     </None>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ML Algorithms\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="Files\stopWords.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
