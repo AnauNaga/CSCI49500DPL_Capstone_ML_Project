@@ -12,6 +12,8 @@ namespace Main
     public static class Master
     {
 
+        public static string[] stopWordList;
+
         public static List<List<string>> CSVData;
         public static List<List<string>> stemmedData;
         public static List<List<string>> lemmentedData;
@@ -38,18 +40,41 @@ namespace Main
             NaiveBayes.learnData(CSVData[0].GetRange(0,200), stemmedData.GetRange(0,200));
             Console.WriteLine("Finished learning data");
             string input = "";
-            while(input != "end")
+            while(true)
             {
                 input = Console.ReadLine();
-                foreach (string word in lemmentedData[Convert.ToInt32(input)])
+                if (input == "end") break;
+                int newsStory;
+                try
                 {
-                    Console.Write(word + " ");
+                    
+                    newsStory = Convert.ToInt32(input);
+                    Console.WriteLine(CSVData[1][newsStory]);
+                    Console.WriteLine();
+                    Console.ReadKey();
+                    Console.Write("\b");
+                    Console.WriteLine(NaiveBayes.estimateData(lemmentedData[Convert.ToInt32(input)]));
+                    Console.WriteLine($"Correct Answer: {CSVData[0][newsStory]}");
                 }
-                Console.WriteLine();
-                Console.ReadKey();
-                Console.WriteLine(NaiveBayes.estimateData(lemmentedData[Convert.ToInt32(input)]));
+                catch (Exception e) {
+                    try
+                    {
+                        List<string> parsedInput = lineToParsedWords(input);
+
+                        Console.WriteLine(NaiveBayes.estimateData(Lemmenter.lemmentArray(parsedInput)));    
+                        
+                    }
+                    catch {
+                        Console.WriteLine("Your input is invalid");
+                    }
+                
+                }
+
+                
             }
         }
+
+
 
         public static void stemLemment()
         {
@@ -90,7 +115,7 @@ namespace Main
 
 
             stopWords = stopWords.Replace("\r\n", "\n");
-            string[] stopWordList = stopWords.Split('\n');
+            stopWordList = stopWords.Split('\n');
 
             //rectify Data
             data = data.Replace('.', ' ');
@@ -100,15 +125,16 @@ namespace Main
             //Parses Data into a 2-dimensional array of strings. the news stories are still one long string that needs to be parsed
             CSVData = parseCSVData(data);
 
+            //Remove the CSV category data
+            CSVData[0].RemoveAt(0);
+            CSVData[1].RemoveAt(0);
             //Parse the single string news stories into individual words of multiple strings
-            List<List<string>> parsedWords = parseWords(CSVData);
+            List<List<string>> parsedWords = parseCollection(CSVData);
 
             //remove empty elements
             parsedWords[1].RemoveAll(element => element == "");
             //remove stop words
             parsedWords[1].RemoveAll(element => stopWordList.Contains(element));
-            //remove the csv category data
-            parsedWords.RemoveAt(0);
 
             //Stem the words
             stemmedData = new List<List<string>>(new List<string>[parsedWords.Count()]);
@@ -157,7 +183,7 @@ namespace Main
             return returnData;
         }
 
-        public static List<List<string>> parseWords(List<List<string>> CSVData)
+        public static List<List<string>> parseCollection(List<List<string>> CSVData)
         {
             //Initialize list of lists of words
             List<List<string>> parsedWords = new List<List<string>>(new List<string>[CSVData[0].Count()]);
@@ -167,6 +193,24 @@ namespace Main
                 parsedWords[row] = CSVData[1][row].Split(' ').ToList();
 
             return parsedWords;
+        }
+
+        public static List<string> lineToParsedWords(string words) {
+
+            //rectify Data
+            words = words.Replace('.', ' ');
+            words = words.Replace('-', ' ');
+            words = new string((from c in words where char.IsWhiteSpace(c) || char.IsLetter(c) || (c == '\n') || (c == ',') select c).ToArray());
+
+            List<string> parsedWords = words.Split(' ').ToList();
+
+            //remove empty elements
+            parsedWords.RemoveAll(element => element == "");
+            //remove stop words
+            parsedWords.RemoveAll(element => stopWordList.Contains(element));
+
+            return parsedWords;
+        
         }
     }
 
