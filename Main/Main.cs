@@ -16,8 +16,18 @@ namespace Main
 
         public static void Main(string[] args)
         {
-            Stemming.stemWord("Ma");
-            Console.ReadKey();
+            string input = "";
+            while (input != "end")
+            {
+                input = Console.ReadLine();
+                Console.WriteLine("Stemmed word:");
+                Console.WriteLine(Stemming.stemWord(input));
+            }
+
+
+
+            //Stemming.stemWord("equitize");
+            //Console.ReadKey();
         }
 
         public static void stemLement()
@@ -28,7 +38,7 @@ namespace Main
             suffixes = new string((from c in suffixes where c != '-' select c).ToArray());
             string[] suffixList = suffixes.Split('\n');
 
-            //rectify Data
+            //rectify Data (remove unneccessary punctuation)
             data = data.Replace('.', ' ');
             data = data.Replace('-', ' ');
             data = new string((from c in data where char.IsWhiteSpace(c) || char.IsLetter(c) || (c == '\n') || (c == ',') select c).ToArray());
@@ -108,22 +118,24 @@ namespace Main
         public static string stemWord(string word)
         {
             //bit packing
-            //0 is a constant
-            //1 is a vowel
+            //0 is a vowel
+            //1 is a consonant
 
-            string returnWord;
-            ulong wordStructure = 0;
+            string returnWord = "";
+            ulong wordStructure = 0;                    //bit packed word
             char structureLength = (char)word.Count();
-            ulong newWordStructure = 0;
+            ulong newWordStructure = 0;                 //bit packed word
 
             //convert word to word structure 
-            for(int i = 0; i < word.Length; i++)
+            for (int i = 0; i < word.Length; i++)
             {
                 wordStructure = wordStructure << 1;
                 if (!vowels.Contains(word[i]))
                     wordStructure += 1;
+
             }
             //reduce word structure
+            ulong oldWordStructure = wordStructure;
             char currLetter = (char)(wordStructure & 1);
             wordStructure = wordStructure >> 1;
             int newStructSize = 1;
@@ -144,26 +156,88 @@ namespace Main
                 }
             }
             newWordStructure = newWordStructure | currLetter;
-
-
-            Console.WriteLine(Convert.ToString((int)newWordStructure, 2));
             //Count the number of vowel-consonant pairs
             int vcPairs = 0;
-            if ((newWordStructure & 1) == 0) newWordStructure >>= 1;
+            bool beginsWithC = false;
+            bool endsWithV = false;
+
+            //newWordStructure is orientated backwards from wordStructure
+            //The left most value of word structure is the first letter of the word
+            //while the right most of newWordStructure is the first letter
+
+            //if the first letter begins with a constant, note it down.
+            if ((newWordStructure & 1) == 1) { newWordStructure >>= 1; newStructSize--; beginsWithC = true; }
+            //if the last letter ends with a vowel, note it down.
+            if ((newWordStructure & ((ulong)1 << (newStructSize-1))) == 0) endsWithV = true;
+
             while (newStructSize > 1)
             {
-                if ((newWordStructure & 3) == 1)
+                if ((newWordStructure & 3) == 2)
                 {
                     vcPairs++;
                 }
                 newWordStructure >>= 2;
                 newStructSize -= 2;
             }
+            returnWord = word;
 
+            //remove plurality
+            if (word.EndsWith("sses")) returnWord = replaceEnd(word, "sses", "ss");
+            else if (word.EndsWith("ies")) returnWord = replaceEnd(word, "ies", "i");
+            else if (word.EndsWith("ss")) returnWord = replaceEnd(word, "ss", "ss");
+            else if (word.EndsWith("s")) returnWord = replaceEnd(word, "s", "");
 
-            Console.WriteLine(vcPairs);
-            return "returnWord";
+            //remove temporality
+            bool removedTemporality = false;
+            if (word.EndsWith("eed")) { if (vcPairs > 1) returnWord = replaceEnd(word, "eed", "ee"); }
+            else if (word.EndsWith("ed"))
+            {
+                string replacement = replaceEnd(word, "ed", "");
+                if (replacement.FirstOrDefault(letter => vowels.Contains(letter)) != 0) { returnWord = replacement; removedTemporality = true; }
+            }
+            else if (word.EndsWith("ing"))
+            {
+                string replacement = replaceEnd(word, "ing", "");
+                if (replacement.FirstOrDefault(letter => vowels.Contains(letter)) != 0) { returnWord = replacement; removedTemporality = true; }
+            }
+
+            //If the word should've had a vowel ending, add it back
+            if (removedTemporality)
+            {
+                char[] exceptionLetters = { 'w', 'x', 'y' };
+                char[] doubleLetters = { 'l', 's', 'z' };
+
+                if (returnWord.EndsWith("at")) returnWord += "e";
+                else if (returnWord.EndsWith("bl")) returnWord += "e";
+                else if (returnWord.EndsWith("iz")) returnWord += "e";
+                else if ((returnWord.Last() == returnWord[returnWord.Count() - 2])){
+                    if (!doubleLetters.Contains(returnWord.Last())){
+                        returnWord = returnWord.Remove(returnWord.Count() - 1);
+                    }
+                }
+                else if ((vcPairs == 2) && (((oldWordStructure>>(structureLength - 3)) & 7) == 5) && (!exceptionLetters.Contains(returnWord.Last())))
+                    returnWord += "e";
+            }
+
+            //put the y back in a word if it needs it
+            if((vcPairs > 0) && !vowels.Contains(returnWord[returnWord.Count()-2]) && returnWord.Last() == 'y')
+                returnWord = returnWord.Remove(returnWord.Count()-1) + 'i';
+            return returnWord;
         }
+
+        public static string replaceEnd(string word, string suffix, string newEnd)
+        {
+            string newWord;
+            int wordLength = word.Count();
+            //remove suffix
+            newWord = word.Remove(word.Length - suffix.Length);
+
+            //apply new end
+            newWord += newEnd;
+
+            return newWord;
+        }
+
     }
 
     public static class Lementization

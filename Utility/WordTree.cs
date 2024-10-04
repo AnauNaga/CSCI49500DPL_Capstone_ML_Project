@@ -23,7 +23,7 @@ namespace Main
                 if (Leaf != null) Vocabulary.Add(Leaf);
             }
 
-
+            
         }
 
         public WordTree reverseWordTree()
