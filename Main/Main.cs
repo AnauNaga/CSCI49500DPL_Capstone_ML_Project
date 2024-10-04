@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using LemmaSharp;
 
 namespace Main
 {
@@ -32,13 +33,21 @@ namespace Main
 
         public static void stemLement()
         {
-            string suffixes = File.ReadAllText(".\\Files\\suffix.txt");
-            string data = File.ReadAllText(".\\Files\\BBC_train_full.csv");
+            //read given files
+            string suffixes     = File.ReadAllText(".\\Files\\suffix.txt");
+            string data         = File.ReadAllText(".\\Files\\BBC_train_full.csv");
+            string stopWords    = File.ReadAllText(".\\Files\\stopWords.txt");
 
-            suffixes = new string((from c in suffixes where c != '-' select c).ToArray());
+
+            //remove the return character
+            suffixes = new string((from c in suffixes where (c != '-') select c).ToArray());
+            suffixes = suffixes.Replace("\r\n", "\n");
             string[] suffixList = suffixes.Split('\n');
 
-            //rectify Data (remove unneccessary punctuation)
+            stopWords = stopWords.Replace("\r\n", "\n");
+            string[] stopWordList = stopWords.Split('\n');
+
+            //rectify Data
             data = data.Replace('.', ' ');
             data = data.Replace('-', ' ');
             data = new string((from c in data where char.IsWhiteSpace(c) || char.IsLetter(c) || (c == '\n') || (c == ',') select c).ToArray());
@@ -47,21 +56,25 @@ namespace Main
 
             //remove empty elements
             parsedWords[1].RemoveAll(element => element == "");
-            for (int news = 1; news < parsedWords[1].Count - 1; news++)
+            //remove stop words
+            parsedWords[1].RemoveAll(element => stopWordList.Contains(element));
+            //for each word in the first news story
+            for (int i = 0; i < parsedWords[1].Count(); i++)
             {
-                //for each word in the first news story
-                //for (int i = 0; i < parsedWords[1].Count(); i++)
-                //{
-                //    Console.CursorLeft = 0;
-                //    Console.Write(news);
-                //}
-
-                Console.CursorLeft = 0;
-                Console.Write(news);
+                Console.Write(parsedWords[1][i]);
+                Console.Write(' ');
             }
             wordTree = new WordTree(parsedWords[1].ToArray());
             suffixTree = new WordTree(suffixList);
             rSuffixTree = suffixTree.reverseWordTree();
+            List<string> line = parsedWords[1];
+            List<string> stemmedLine = Stemming.stemArray(line);
+            Console.WriteLine();
+            foreach (string word in stemmedLine)
+            {
+                Console.Write(word + ' ');
+            }
+
             Console.ReadKey();
         }
 
@@ -242,6 +255,17 @@ namespace Main
 
     public static class Lementization
     {
+        public static Lemmatizer lemmatizer = new Lemmatizer();
+        public static List<string> lementArray(List<string> words)
+        {
+            List<string> returnList = new List<string>();
+            foreach (string word in words)
+            {
+                returnList.Add(lemmatizer.Lemmatize(word));
+            }
+            return returnList;
+        }
+
         public static void lementWord()
         {
 
