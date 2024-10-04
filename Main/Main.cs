@@ -36,7 +36,6 @@ namespace Main
             Console.WriteLine();
             Console.WriteLine("Finished populating vocabulary");
             answers = CSVData[0];
-            answers.RemoveAt(0);
             NaiveBayes.learnData(CSVData[0].GetRange(0,200), stemmedData.GetRange(0,200));
             Console.WriteLine("Finished learning data");
             string input = "";

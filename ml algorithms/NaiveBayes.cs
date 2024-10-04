@@ -115,6 +115,12 @@ namespace Master
                     estimatedCategory = category;
                 }
             }
+            foreach(string category in categoryOrder.Keys)
+            {
+                Console.WriteLine($"{category} : {probability[categoryOrder[category]]}");
+            }
+
+
             return estimatedCategory;
         }
     }
