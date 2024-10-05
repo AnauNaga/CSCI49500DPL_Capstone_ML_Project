@@ -23,7 +23,7 @@ namespace Main
                 if (Leaf != null) Vocabulary.Add(Leaf);
             }
 
-
+            
         }
 
         public WordTree reverseWordTree()
@@ -74,7 +74,7 @@ namespace Main
                     {
                         currTree.branches.Add(letter, new Tree());
                         currTree.branches[letter].rootTree = currTree;
-                        currTree = currTree.branches[letter];
+                        currTree.branches[letter].rootTree = currTree;
                         currTree.letter = letter;
                     }
                 }
