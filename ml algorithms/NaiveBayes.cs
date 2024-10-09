@@ -11,13 +11,13 @@ namespace Master
 {
     public static class NaiveBayes
     {
-        public static Dictionary<string, float[]> probabilityTable = new Dictionary<string, float[]>();
-        public static float[] defaultProbability;
-        public static Dictionary<string, float[]> wordCount = new Dictionary<string, float[]>();
-        public static float vocabularySize;
-        public static List<float> categoryTotalWordCount;
+        public static Dictionary<string, double[]> probabilityTable = new Dictionary<string, double[]>();
+        public static double[] defaultProbability;
+        public static Dictionary<string, double[]> wordCount = new Dictionary<string, double[]>();
+        public static double vocabularySize;
+        public static List<double> categoryTotalWordCount;
         public static Dictionary<string, int> categoryCount = new Dictionary<string, int>();
-        public static float trainingDataCount = 0;
+        public static double trainingDataCount = 0;
         public static Dictionary<string,int> categoryOrder = new Dictionary<string, int>();
 
 
@@ -31,9 +31,9 @@ namespace Master
                 if(categoryCount.ContainsKey(answer)) categoryCount[answer]++;
                 else {categoryCount.Add(answer, 1); categoryOrder.Add(answer,categoryIndex); categoryIndex++; }
 
-            categoryTotalWordCount = new List<float>(new float[categoryOrder.Count()]);
+            categoryTotalWordCount = new List<double>(new double[categoryOrder.Count()]);
             for (int i = 0; i < categoryTotalWordCount.Count; i++) categoryTotalWordCount[i] = 0;
-            defaultProbability = new float[categoryOrder.Count()];
+            defaultProbability = new double[categoryOrder.Count()];
 
             //Count the words for each category
             //Add the word to the dictionary if it is missing
@@ -44,7 +44,7 @@ namespace Master
                 {
                     //if the word is missing from the dictionary, add it
                     if (!wordCount.ContainsKey(word))
-                        wordCount.Add(word, new float[categoryIndex + 1]);
+                        wordCount.Add(word, new double[categoryIndex + 1]);
                     //increase the counter for the word
                     wordCount[word][categoryOrder[answers[newsStory]]]++;
                     //increase the total word counter for a category
@@ -60,7 +60,7 @@ namespace Master
                 foreach(string category in categoryOrder.Keys)
                 {
                     int index = categoryOrder[category];
-                    if (!probabilityTable.ContainsKey(word)) probabilityTable.Add(word, new float[categoryOrder.Count()]);
+                    if (!probabilityTable.ContainsKey(word)) probabilityTable.Add(word, new double[categoryOrder.Count()]);
                     probabilityTable[word][index] = (wordCount[word][index] + 1) / (categoryTotalWordCount[index]+vocabularySize);
                 }
             }
@@ -75,7 +75,7 @@ namespace Master
 
         public static string estimateData(List<string> data)
         {
-            List<float> probability = new List<float>(new float[categoryOrder.Count()]);
+            List<double> probability = new List<double>(new double[categoryOrder.Count()]);
             foreach (string index in categoryOrder.Keys)
             {
                 probability[categoryOrder[index]] = categoryCount[index] / trainingDataCount;
@@ -83,7 +83,7 @@ namespace Master
 
             foreach (string word in data)
             {
-                float normAffordance = -1000;
+                double normAffordance = -1000;
                 foreach (int index in categoryOrder.Values)
                 {
                     //if the word has a probability
@@ -92,11 +92,11 @@ namespace Master
                     //else use the default probability
                     else
                         probability[index] *= defaultProbability[index];
-                    float thisAffordance = (float)Math.Log10(probability[index]);
+                    double thisAffordance = Math.Log10(probability[index]);
                     if (normAffordance < thisAffordance)
                         normAffordance = thisAffordance;
                 }
-                float offset = (float)Math.Pow(10, Math.Abs(Math.Floor(normAffordance)) + 1);
+                double offset = Math.Pow(10, Math.Abs(Math.Floor(normAffordance)) + 1);
                 //normalize the probabilities
                 foreach (int index in categoryOrder.Values)
                 {
@@ -105,7 +105,7 @@ namespace Master
             }
 
             //find the largest number
-            float largestProb = 0;
+            double largestProb = 0;
             string estimatedCategory = "";
             foreach (string category in categoryOrder.Keys)
             {
