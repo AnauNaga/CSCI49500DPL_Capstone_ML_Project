@@ -77,12 +77,74 @@ namespace Main
       return a;
     }
 
+    public Matrix CrossWithTransposeOf(Matrix b)
+    {
+      Matrix a = this;
+      if (a.length != b.length) throw new ArgumentException("Length of Matrix a does not equal the height of Matrix b");
+
+      Matrix c = new Matrix(a.height, b.height);
+
+
+      //for each cell in matrix c
+      for (int i = 0; i < c.height; i++)
+      {
+        for (int j = 0; j < c.length; j++)
+        {
+
+          //find the value of each cell by summing up the products from matrix a and b
+          double sum = 0;
+          for (int k = 0; k < a.length; k++)
+          {
+            sum += a.matrix[i][k] * b.matrix[j][k];
+          }
+
+          c.matrix[i][j] = sum;
+        }
+      }
+
+      return c;
+
+    }
+
+    public Matrix transposeAndCrossWith(Matrix b)
+    {
+      Matrix a = this;
+      if (a.height != b.height) throw new ArgumentException("Length of Matrix a does not equal the height of Matrix b");
+
+      Matrix c = new Matrix(a.length, b.length);
+
+
+      //for each cell in matrix c
+      for (int i = 0; i < c.height; i++)
+      {
+        for (int j = 0; j < c.length; j++)
+        {
+
+          //find the value of each cell by summing up the products from matrix a and b
+          double sum = 0;
+          for (int k = 0; k < a.height; k++)
+          {
+            sum += a.matrix[k][i] * b.matrix[k][j];
+          }
+
+          c.matrix[i][j] = sum;
+        }
+      }
+
+      return c;
+
+    }
+
     public Matrix sigmoid()
     {
       Matrix a = new Matrix(height,length);
-      for (int i = 0; i < height; i++)
-        for (int j = 0; j < length; j++)
-          a[i,j] = 1 / (1 + Math.Exp(1 - matrix[i][j]));
+      for (int i = 0; i < height; i++) {
+        for (int j = 0; j < length; j++) {
+          //a[i,j] = 1 / (1 + Math.Exp(1 - matrix[i][j]));
+          double myNum = matrix[i][j];
+          a[i, j] = myNum/ (1+ (myNum > 0 ? myNum : -myNum));
+        }
+      }
       return a;
     }
 
@@ -93,16 +155,30 @@ namespace Main
       {
         for (int j = 0; j < length; j++)
         {
-          double eNegx = Math.Exp(matrix[i][j]);
-          a[i, j] = (eNegx / ((1 + eNegx) * (1 + eNegx)));
+          //double eNegx = Math.Exp(matrix[i][j]);
+          //a[i, j] = (eNegx / ((1 + eNegx) * (1 + eNegx)));
+          double myNum = matrix[i][j];
+          double onePlusAbs = (1 + (myNum > 0 ? myNum : -myNum));
+          a[i, j] = 1 / (onePlusAbs * onePlusAbs);
         }
       }
       return a;
     }
 
+    public void zero()
+    {
+      for (int i = 0; i < height; i++)
+      {
+        for (int j = 0; j < length; j++)
+        {
+          matrix[i][j] = 0;
+        }
+      }
+    }
+
     public Matrix hammondProduct(Matrix multiplier)
     {
-      if ((height != multiplier.height) && (length != multiplier.length)) throw new ArgumentException("Matricies are not the same size");
+      if ((height != multiplier.height) || (length != multiplier.length)) throw new ArgumentException("Matricies are not the same size");
       Matrix c = new Matrix(this);
 
       for (int i = 0; i < height; i++)
@@ -149,8 +225,6 @@ namespace Main
     {
       if (a.length != b.height) throw new ArgumentException("Length of Matrix a does not equal the height of Matrix b");
 
-      int height = a.height;
-
       Matrix c = new Matrix(a.height, b.length);
 
       for (int i = 0; i < a.height; i++)
@@ -164,6 +238,20 @@ namespace Main
           }
 
           c.matrix[i][j] = sum;
+        }
+      }
+
+      return c;
+    }
+
+    public static Matrix operator /(Matrix a, double b)
+    {
+      Matrix c = new Matrix(a);
+      for (int i = 0; i < a.height; i++)
+      {
+        for (int j = 0; j < a.length; j++)
+        {
+          c[i, j] /= b;
         }
       }
 
